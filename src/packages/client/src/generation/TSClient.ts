@@ -287,22 +287,7 @@ export class TSClient implements Generatable {
 
     return `${commonCodeJS(this.options)}
 
-/**
- * Build tool annotations
- * In order to make \`ncc\` and \`node-file-trace\` happy.
-**/
 
-${this.options.platforms
-        ? this.options.platforms
-          .map((p) => `path.join(__dirname, 'query-engine-${p}');`)
-          .join('\n')
-        : ''
-      }
-
-/**
- * Annotation for \`node-file-trace\`
-**/
-path.join(__dirname, 'schema.prisma');
 
 /**
  * Enums
@@ -327,10 +312,29 @@ exports.dmmf = JSON.parse(dmmfString)
 /**
  * Create the Client
  */
-
+function fixNextPath(anyPath){
+  return path.resolve(anyPath.replace('/vercel/workpath0/', './'))
+}
 const config = ${JSON.stringify(config, null, 2)}
 config.document = dmmf
-config.dirname = __dirname
+config.dirname = config.generator.output ? fixNextPath(config.generator.output) : __dirname
+
+/**
+ * Build tool annotations
+ * In order to make \`ncc\` and \`node-file-trace\` happy.
+**/
+
+${this.options.platforms
+        ? this.options.platforms
+          .map((p) => `path.join(config.dirname, 'query-engine-${p}');`)
+          .join('\n')
+        : ''
+      }
+
+/**
+ * Annotation for \`node-file-trace\`
+**/
+path.join(config.dirname, 'schema.prisma');
 
 const PrismaClient = getPrismaClient(config)
 exports.PrismaClient = PrismaClient`
