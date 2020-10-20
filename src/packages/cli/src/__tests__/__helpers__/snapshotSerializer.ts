@@ -29,7 +29,9 @@ function normalizeGithubLinks(str) {
     'TEST_GITHUB_LINK',
   )
 }
-
+function normalizeTmpDir(str) {
+  return str.replace(/\/tmp\/([a-z0-9]+)\//g, '/tmp/dir/')
+}
 const serializer = {
   test(value) {
     return typeof value === 'string' || value instanceof Error
@@ -42,9 +44,11 @@ const serializer = {
         ? value.message
         : ''
     return prepareSchemaForSnapshot(
-      normalizeGithubLinks(
-        normalizeToUnixPaths(
-          removePlatforms(trimErrorPaths(stripAnsi(message))),
+      normalizeTmpDir(
+        normalizeGithubLinks(
+          normalizeToUnixPaths(
+            removePlatforms(trimErrorPaths(stripAnsi(message))),
+          ),
         ),
       ),
     )
