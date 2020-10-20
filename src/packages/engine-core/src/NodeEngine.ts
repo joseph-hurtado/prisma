@@ -31,14 +31,6 @@ const debug = debugLib('engine')
 const exists = promisify(fs.exists)
 const readdir = promisify(fs.readdir)
 
-function prefixRelativePathIfNecessary(relativePath: string): string {
-  if (relativePath.startsWith('..')) {
-    return relativePath
-  }
-
-  return `./${relativePath}`
-}
-
 export interface DatasourceOverwrite {
   name: string
   url: string
@@ -352,11 +344,11 @@ You may have to run ${chalk.greenBright(
         this.platform,
         path.resolve(__dirname, `..`),
       )
-      return { prismaPath: enginePath, searchedLocations }
+      return { prismaPath: enginePath, searchedLocations: [path.resolve(__dirname, `..`)] }
     }
     const searchPaths: string[] = [
       eval(`require('path').join(__dirname, '../../../.prisma/client')`), // Dot Prisma Path
-      this.generator?.output ? path.join(process.cwd(), 'db') :  eval('__dirname'), // Custom Generator Path
+      eval('__dirname'), 
       path.join(eval('__dirname'), '..'), // parentDirName
       path.dirname(this.datamodelPath), // Datamodel Dir
       this.cwd, //cwdPath
